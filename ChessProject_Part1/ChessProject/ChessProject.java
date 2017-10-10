@@ -204,10 +204,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		if (chessPiece == null) return;
 
 		chessPiece.setVisible(false);
-		Boolean success = false;
+		Boolean Whitesuccess = false;
+		Boolean Blacksuccess = false;
 		validMove = false;
-		Boolean whitehome = false;
-		Boolean blackhome = false;
 		Component c = chessBoard.findComponentAt(e.getX(), e.getY());
 		String tmp = chessPiece.getIcon().toString();
 		String pieceName = tmp.substring(0, (tmp.length() - 4));
@@ -240,6 +239,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		if (pieceName.equals("BlackQueen")) {
 			validMove = true;
 		}
+		if (pieceName.equals("WhiteQueen")) {
+			validMove = true;
+		}
 		else if (pieceName.equals("BlackPawn") && isWhiteTurn) {
 			//If black is in starting position you should be allowed move it
 			//6 spaces down on Y axis is where black pawn starts
@@ -267,6 +269,10 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 				if(piecePresent(e.getX(),e.getY())){
 					if(checkBlackOponent(e.getX(),e.getY())){
 						validMove = true;
+
+						if (landingY == 0){
+							Blacksuccess = true;
+						}
 					}
 				}
 				}
@@ -281,6 +287,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 					if(piecePresent(e.getX(),e.getY())){
 						if(checkBlackOponent(e.getX(),e.getY())){
 							validMove = true;
+							if (landingY == 0){
+								Blacksuccess = true;
+							}
 						}
 					}
 				}
@@ -311,6 +320,11 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 						if (piecePresent(e.getX(), e.getY())) {
 							if (checkWhiteOponent(e.getX(), e.getY())) {
 								validMove = true;
+								if (landingY == 7) {
+									Whitesuccess = true;
+								}
+							} else {
+								validMove = false;
 							}
 						}
 					}
@@ -325,6 +339,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 							if(piecePresent(e.getX(),e.getY())){
 								if(checkWhiteOponent(e.getX(),e.getY())){
 									validMove = true;
+									if (landingY == 7) {
+										Whitesuccess = true;
+									}
 								}
 							}
 						}
@@ -335,11 +352,157 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 						switchTurns();
 		}
 
+		else if (pieceName.equals("WhiteKnight") && isWhiteTurn){
+			if (((landingX < 0) || (landingX > 7)) || ((landingY < 0) || (landingY > 7))) {
+				validMove = false;
+			}
+		else {
+				if ((xMovement == 1 && yMovement == 2) || (xMovement == 2 && yMovement ==1 )){
+					if (piecePresent(e.getX(), e.getY())) {
+						if (pieceName.contains("White")){
+							validMove = checkWhiteOponent(e.getX(),(e.getY()));
+						}
+					}
+				else {
+						validMove = true;
+					}
+				}
+				else {
+					validMove = false;
+				}
+			}
+			switchTurns();
+		}
 
+		else if (pieceName.equals("BlackKnight") && isWhiteTurn){
+			if (((landingX < 0) || (landingX > 7)) || ((landingY < 0) || (landingY > 7))) {
+				validMove = false;
+			}
+			else {
+				if ((xMovement == 1 && yMovement == 2) || (xMovement == 2 && yMovement ==1 )){
+					if (piecePresent(e.getX(), e.getY())) {
+						if (pieceName.contains("Black")){
+							validMove = checkBlackOponent(e.getX(),(e.getY()));
+						}
+					}
+					else {
+						validMove = true;
+					}
+				}
+				else {
+					validMove = false;
+				}
+			}
+			switchTurns();
+		}
 
+		else if (pieceName.equals("WhiteBishup")&&isWhiteTurn) {
+			Boolean inTheWay = false;
+			int distance = Math.abs(startX - landingX);
+			if (((landingX < 0) || (landingX > 7)) || ((landingY < 0) || (landingY > 7))) {
+				validMove = false;
+			} else {
+				validMove = true;
+				if (Math.abs(startX - landingX) == Math.abs(startY - landingY)) {
+
+					if ((startX - landingX < 0) && (startY - landingY < 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX + (i * 75)), (initialY + (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX < 0) && (startY - landingY > 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX + (i * 75)), (initialY - (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX > 0) && (startY - landingY > 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX - (i * 75)), (initialY - (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX > 0) && (startY - landingY < 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX - (i * 75)), (initialY + (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					}
+
+					if (inTheWay) {
+						validMove = false;
+					} else {
+						if (piecePresent(e.getX(), e.getY())) {
+							if (pieceName.contains("White")) {
+								validMove = checkWhiteOponent(e.getX(), e.getY());
+							}
+						} else {
+							validMove = true;
+						}
+					}
+				} else {
+					validMove = false;
+				}
+			}
+			switchTurns();
+		}
+
+		else if (pieceName.equals("BlackBishup")&&isWhiteTurn) {
+			Boolean inTheWay = false;
+			int distance = Math.abs(startX - landingX);
+			if (((landingX < 0) || (landingX > 7)) || ((landingY < 0) || (landingY > 7))) {
+				validMove = false;
+			} else {
+				validMove = true;
+				if (Math.abs(startX - landingX) == Math.abs(startY - landingY)) {
+					if ((startX - landingX < 0) && (startY - landingY < 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX + (i * 75)), (initialY + (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX < 0) && (startY - landingY > 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX + (i * 75)), (initialY - (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX > 0) && (startY - landingY > 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX - (i * 75)), (initialY - (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					} else if ((startX - landingX > 0) && (startY - landingY < 0)) {
+						for (int i = 0; i < distance; i++) {
+							if (piecePresent((initialX - (i * 75)), (initialY + (i * 75)))) {
+								inTheWay = true;
+							}
+						}
+					}
+
+					if (inTheWay) {
+						validMove = false;
+					}  else {
+						if (piecePresent(e.getX(), e.getY())) {
+							if (pieceName.contains("White")) {
+								validMove = checkWhiteOponent(e.getX(), e.getY());
+							}
+						} else {
+							validMove = true;
+						}
+					}
+				} else {
+					validMove = false;
+				}
+			}
+			switchTurns();
+		}
 
 			if (!validMove) {
-				int location = 0;
+				int location;
 				if (startY == 0) {
 					location = startX;
 				} else {
@@ -349,22 +512,30 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 				pieces = new JLabel(new ImageIcon(pieceLocation));
 				panels = (JPanel) chessBoard.getComponent(location);
 				panels.add(pieces);
-			} else {
-				if (success) {
-					int location = 56 + (e.getX() / 75);
+			}
+			else {
+				if (Blacksuccess) {
+					int location = 0 + (e.getX() / 75);
 					if (c instanceof JLabel) {
 						Container parent = c.getParent();
 						parent.remove(0);
-						pieces = new JLabel(new ImageIcon("WhiteQueen.png"));
-						parent = (JPanel) chessBoard.getComponent(location);
-						parent.add(pieces);
-					} else {
-						Container parent = (Container) c;
-						pieces = new JLabel(new ImageIcon("WhiteQueen.png"));
+						pieces = new JLabel(new ImageIcon("BlackQueen.png"));
 						parent = (JPanel) chessBoard.getComponent(location);
 						parent.add(pieces);
 					}
-				} else {
+				}
+				else if (Whitesuccess) {
+						int location = 56 + (e.getX() / 75);
+						if (c instanceof JLabel) {
+							Container parent = c.getParent();
+							parent.remove(0);
+							pieces = new JLabel(new ImageIcon("WhiteQueen.png"));
+							parent = (JPanel) chessBoard.getComponent(location);
+							parent.add(pieces);
+						}
+					}
+
+				else {
 					if (c instanceof JLabel) {
 						Container parent = c.getParent();
 						parent.remove(0);
