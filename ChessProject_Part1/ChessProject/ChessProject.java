@@ -20,6 +20,9 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 	int initialY;
 	JPanel panels;
 	JLabel pieces;
+	Boolean isWhiteTurn = true;
+	Boolean validMove;
+
 
 
 	public ChessProject() {
@@ -156,6 +159,16 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 	}
 
 	/*
+		Makes White go first - Turns
+	*/
+
+	private void switchTurns(){
+		if(validMove){
+			isWhiteTurn = !isWhiteTurn;
+		}
+	}
+
+	/*
 		This method is called when we press the Mouse. So we need to find out what piece we have
 		selected. We may also not have selected a piece!
 	*/
@@ -192,13 +205,16 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 
 		chessPiece.setVisible(false);
 		Boolean success = false;
+		validMove = false;
+		Boolean whitehome = false;
+		Boolean blackhome = false;
 		Component c = chessBoard.findComponentAt(e.getX(), e.getY());
 		String tmp = chessPiece.getIcon().toString();
 		String pieceName = tmp.substring(0, (tmp.length() - 4));
 		Boolean validMove = false;
 
 		int landingX = (e.getX() / 75);
-		int landyingY = (e.getY() / 75);
+		int landingY = (e.getY() / 75);
 		int xMovement = Math.abs((e.getX() / 75) - startX);
 		int yMovement = Math.abs((e.getY() / 75) - startY);
 
@@ -208,53 +224,46 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 		System.out.println("The starting coordinates are: " + "( " + startX + "," + startY + ")");
 		System.out.println("The x Movement is: " + xMovement);
 		System.out.println("The y Movement is: " + yMovement);
-		System.out.println("The landing coordinates are: " + "( " + landingX + "," + landyingY + ")");
+		System.out.println("The landing coordinates are: " + "( " + landingX + "," + landingY + ")");
 		System.out.println("-----------------------------------------------");
-
-
 		/*
 			The only piece that has been enabled to move is a White Pawn...but we should really have this is a separate
 			method somewhere...how would this work.
-
-			So a Pawn is able to move two squares forward one its first go but only one square after that.
+				So a Pawn is able to move two squares forward one its first go but only one square after that.
 			The Pawn is the only piece that cannot move backwards in chess...so be careful when committing
 			a pawn forward. A Pawn is able to take any of the opponent’s pieces but they have to be one
 			square forward and one square over, i.e. in a diagonal direction from the Pawns original position.
 			If a Pawn makes it to the top of the other side, the Pawn can turn into any other piece, for
 			demonstration purposes the Pawn here turns into a Queen.
 		*/
-
 		//DELETE THIS WHEN FINISHED, MAKES THE BLACK QUEEN MOVE WHEREVER
 		if (pieceName.equals("BlackQueen")) {
 			validMove = true;
 		}
-		else if (pieceName.equals("BlackPawn")) {
+		else if (pieceName.equals("BlackPawn") && isWhiteTurn) {
 			//If black is in starting position you should be allowed move it
-			if (startY == 6) { //PAWN'S FIRST MOVE
+			//6 spaces down on Y axis is where black pawn starts
+			if (startY == 6) {
 
-
-			/*
-			If the pawn is making its first movement only
-			the pawn can move one or two squares
-			must move up the board
-			no movement in x direction
-
-			 */
-
-			if (((yMovement == 1 || yMovement == 2)) && (startY > landyingY) && (xMovement == 0)) {
+				//PAWN'S FIRST MOVE (only 1 or 2 spaces up on y axis)
+				//start y > landing y as you can't go backwards & xmovement == 0 so you can't move diagonally
+			if (((yMovement == 1 || yMovement == 2)) && (startY > landingY) && (xMovement == 0)) {
 				if (yMovement == 2) {
 					if((!piecePresent(e.getX(),e.getY()))&&(!piecePresent(e.getX(),(e.getY()+75)))){
 						validMove = true;
 					}
 				}
-
+				//Detects if there's a piece in the way
 				else {
 					if(!piecePresent(e.getX(),e.getY())){
 					validMove = true;
 					}
 				}
 			}
-			else if (((yMovement == 1) && (startY > landyingY) && (xMovement == 1))) {
+
+			//Taking an enemy piece.. y movement and x movement == 1 so it moves up and diagonally once
+			//piece must be present to move 1 on xmovement
+			else if (((yMovement == 1) && (startY > landingY) && (xMovement == 1))) {
 				if(piecePresent(e.getX(),e.getY())){
 					if(checkBlackOponent(e.getX(),e.getY())){
 						validMove = true;
@@ -263,72 +272,72 @@ public class ChessProject extends JFrame implements MouseListener, MouseMotionLi
 				}
 		}
 		else { //WHERE PAWN MAKES ALL MOVES AFTER THE FIRST
-				if (((yMovement == 1)) && (startY > landyingY) && (xMovement == 0)) {
+				if (((yMovement == 1)) && (startY > landingY) && (xMovement == 0)) {
 					if (!piecePresent(e.getX(), e.getY())) {
 						validMove = true;
 					}
 				}
-				else if (((yMovement == 1) && (startY > landyingY) && (xMovement == 1))) {
+				else if (((yMovement == 1) && (startY > landingY) && (xMovement == 1))) {
 					if(piecePresent(e.getX(),e.getY())){
 						if(checkBlackOponent(e.getX(),e.getY())){
 							validMove = true;
 						}
 					}
 				}
-			}
-		}
-
-			else if (pieceName.equals("WhitePawn")) {
-				if (startY == 1) {
-					if ((startX == (e.getX() / 75)) && ((((e.getY() / 75) - startY) == 1) || ((e.getY() / 75) - startY) == 2)) {
-						if ((((e.getY() / 75) - startY) == 2)) {
-							if ((!piecePresent(e.getX(), (e.getY()))) && (!piecePresent(e.getX(), (e.getY() + 75)))) {
-								validMove = true;
-							} else {
-								validMove = false;
-							}
-						} else {
-							if ((!piecePresent(e.getX(), (e.getY())))) {
-								validMove = true;
-							} else {
-								validMove = false;
-							}
-						}
-					} else {
-						validMove = false;
-					}
-				} else {
-					int newY = e.getY() / 75;
-					int newX = e.getX() / 75;
-					if ((startX - 1 >= 0) || (startX + 1 <= 7)) {
-						if ((piecePresent(e.getX(), (e.getY()))) && ((((newX == (startX + 1) && (startX + 1 <= 7))) || ((newX == (startX - 1)) && (startX - 1 >= 0))))) {
-							if (checkWhiteOponent(e.getX(), e.getY())) {
-								validMove = true;
-								if (startY == 6) {
-									success = true;
-								}
-							} else {
-								validMove = false;
-							}
-						} else {
-							if (!piecePresent(e.getX(), (e.getY()))) {
-								if ((startX == (e.getX() / 75)) && ((e.getY() / 75) - startY) == 1) {
-									if (startY == 6) {
-										success = true;
-									}
-									validMove = true;
-								} else {
-									validMove = false;
-								}
-							} else {
-								validMove = false;
-							}
-						}
-					} else {
-						validMove = false;
-					}
+			else {
+					validMove = false;
 				}
 			}
+			switchTurns();
+		}
+		else if (pieceName.equals("WhitePawn") && isWhiteTurn) {
+				if (startY == 1) {
+					if (((yMovement == 1 || yMovement == 2)) && (landingY > startY) && (xMovement == 0)) {
+						if (yMovement == 2) {
+							if ((!piecePresent(e.getX(), e.getY())) && (!piecePresent(e.getX(), (e.getY() - 75)))) {
+								validMove = true;
+							}
+						}
+						//Detects if there's a piece in the way
+						else {
+							if (!piecePresent(e.getX(), e.getY())) {
+								validMove = true;
+							}
+						}
+					}
+//Taking an enemy piece.. y movement and x movement == 1 so it moves up and diagonally once
+					//piece must be present to move 1 on Xmovement
+					else if (((yMovement == 1) && (startY > landingY) && (xMovement == 1))) {
+						if (piecePresent(e.getX(), e.getY())) {
+							if (checkWhiteOponent(e.getX(), e.getY())) {
+								validMove = true;
+							}
+						}
+					}
+				}
+					else { //WHERE PAWN MAKES ALL MOVES AFTER THE FIRST
+						if (((yMovement == 1)) && (landingY > startY) && (xMovement == 0)) {
+							if (!piecePresent(e.getX(), e.getY())) {
+								validMove = true;
+							}
+						}
+						else if (((yMovement == 1) && (landingY > startY) && (xMovement == 1))) {
+							if(piecePresent(e.getX(),e.getY())){
+								if(checkWhiteOponent(e.getX(),e.getY())){
+									validMove = true;
+								}
+							}
+						}
+						else {
+							validMove = false;
+						}
+				}
+						switchTurns();
+		}
+
+
+
+
 			if (!validMove) {
 				int location = 0;
 				if (startY == 0) {
